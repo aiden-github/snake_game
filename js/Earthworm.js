@@ -7,11 +7,13 @@ function Earthworm() {
   this.body = startBody.slice();
   this.arrow = startArrow;
   
+  // 시작위치 복원
   this.replace = function () {
     this.body = startBody.slice();
     this.arrow = startArrow;
   }
 
+  // 한칸 이동
   this.move = function () {
     const head = this.body[0];
     const movingX = this.arrow === ARROW.left ? -1
@@ -26,10 +28,12 @@ function Earthworm() {
     return newHead;  // 새로운 머리 위치 반환
   }
 
+  // 방향 설정
   this.setArrow = function (newArrow) {
     this.arrow = newArrow ? newArrow : ARROW.up;
   }
 
+  // 방향 값 반환
   this.getArrow = function () {
     return this.arrow;
   }

@@ -24,8 +24,15 @@ function Field(row, column) {
   function takeTurn(field) {
     return function () {
       const pos = field.earthworm.move();
-      // 아웃인지 체크
-      if (pos.x < 0 || pos.x >= field.row || pos.y < 0 || pos.y >= field.column) {
+      // 라인아웃 or 머리,몸 충돌 체크
+      const isOut = pos.x < 0 || pos.x >= field.row || pos.y < 0 || pos.y >= field.column;
+      const copied = field.earthworm.body.slice();
+      copied.splice(0, 1);
+      const isConflict = copied.findIndex(function ({ x, y }) {
+        return (x === pos.x && y === pos.y)
+      }) !== -1;
+      
+      if (isOut || isConflict) {
         field.pause();
         const replay = confirm('아웃입니다! 다시 시작하시겠습니까?');
         if (replay) {
