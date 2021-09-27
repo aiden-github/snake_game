@@ -1,0 +1,16 @@
+#field{
+  display: inline-block;
+  border: 5px solid black;
+}
+#field .column{
+  display: flex;
+}
+#field .block{
+  width: 20px;
+  height: 20px; 
+  border-radius: 5px;
+}
+
+#field .block.fill{
+  background: black;
+}
