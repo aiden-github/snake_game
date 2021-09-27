@@ -1,18 +1,3 @@
-const CLASS_FIELD_COLUMN = 'column';
-const CLASS_FIELD_BLOCK = 'block';
-const CLASS_FIELD_BLOCK_FILL = 'fill';
-
-const fieldDom = document.querySelector('#field');
-
-
-// 방향 enum
-const ARROW = {
-  up: 0,
-  right: 1,
-  down: 2,
-  left: 3
-}
-
 // 필드 객체
 function Field(row, column) {
   this.row = row ? row : 10;
@@ -133,49 +118,3 @@ function Field(row, column) {
   }
 
 }
-
-// 지렁이 객체
-function Earthworm() {
-  const startBody = [{ x: 3, y: 5 }, { x: 2, y: 5 }, { x: 1, y: 5 }];
-  const startArrow = ARROW.right;
-
-  this.body = startBody.slice();
-  this.arrow = startArrow;
-  
-  this.replace = function () {
-    this.body = startBody.slice();
-    this.arrow = startArrow;
-  }
-
-  this.move = function () {
-    const head = this.body[0];
-    const movingX = this.arrow === ARROW.left ? -1
-      : this.arrow === ARROW.right ? 1 : 0;
-    const movingY = this.arrow === ARROW.up ? -1
-      : this.arrow === ARROW.down ? 1 : 0;
-
-    const newHead = { x: head.x + movingX, y: head.y + movingY };
-    this.body.unshift(newHead);
-    this.body.pop();
-
-    return newHead;  // 새로운 머리 위치 반환
-  }
-
-  this.setArrow = function (newArrow) {
-    this.arrow = newArrow ? newArrow : ARROW.up;
-  }
-
-  this.getArrow = function () {
-    return this.arrow;
-  }
-}
-
-
-// main
-(function main() {
-  const field = new Field(30, 30);
-  const worm = new Earthworm();
-  field.init(worm);
-
-
-}) ();
