@@ -43,6 +43,7 @@ function Field(row, column) {
         const replay = confirm(`${ isOut ? '라인' : '충돌' } 아웃입니다! \n다시 시작하시겠습니까?`);
         if (replay) {
           field.earthworm.replace();
+          field.feed();
           field.reload();
           field.play();
         }
@@ -68,27 +69,26 @@ function Field(row, column) {
   }
 
   // 먹이 생성
-  const feed = (function (field) {
-    return function () {
-      let food = { x: 0, y: 0 };
+  this.feed = function () {
+    let food = { x: 0, y: 0 };
       
-      let conflictWithBody = false;
-      do {
-        food = {
-          x: Math.floor(Math.random() * (field.row)),
-          y: Math.floor(Math.random() * (field.column))
-        }
+    let conflictWithBody = false;
+    do {
+      food = {
+        x: Math.floor(Math.random() * (this.row)),
+        y: Math.floor(Math.random() * (this.column))
+      }
         
-        // 먹이와 지렁이가 겹치는지 확인
-        conflictWithBody = field.earthworm.body.findIndex(function (block) {
-          return isSamePosition(block, food)
-        }) !== -1;
+      // 먹이와 지렁이가 겹치는지 확인
+      conflictWithBody = this.earthworm.body.findIndex(function (block) {
+        return isSamePosition(block, food)
+      }) !== -1;
   
-      } while (conflictWithBody);
+    } while (conflictWithBody);
   
-      field.food = food;
-    }
-  })(this);
+    this.food = food;
+  };
+
 
 
   // 필드 초기화
@@ -146,7 +146,7 @@ function Field(row, column) {
   this.reload = function () {
     clearField();
     drawEarthWorm(this.earthworm);
-    !this.food && feed(this);
+    !this.food && this.feed();
     fillBlock(this.food, [CLASS_FIELD_BLOCK_FOOD]);
   }
 
