@@ -2,37 +2,43 @@
 function Field(row, column) {
   this.row = row ? row : 10;
   this.column = column ? column : 10;
+  this.food;
   this.earthworm;
   this.interval;
 
+  // 블록 채우기
+  function fillBlock(pos, otherClass = []) {
+    if (!pos) return;
+    const x = pos.x ? pos.x : 0;
+    const y = pos.y ? pos.y : 0;
+    const block = fieldDom.children[y].children[x];
+    block.classList.add(CLASS_FIELD_BLOCK_FILL);
+    for (var index in otherClass) {
+      block.classList.add(otherClass[index]);
+    }
+  }
 
   // 지렁이 그리기 함수
   function drawEarthWorm(earthworm) {
-
-    const fillBlock = function (pos = { x: 0, y: 0 }) {
-      const x = pos.x ? pos.x : 0;
-      const y = pos.y ? pos.y : 0;
-      const block = fieldDom.children[y].children[x];
-      block.classList.add(CLASS_FIELD_BLOCK_FILL);  
-    }
     for (let index in earthworm.body) {
-      fillBlock(earthworm.body[index]);
+      fillBlock(earthworm.body[index], index == 0 ? [CLASS_FIELD_BLOCK_HEAD] : undefined);
     }
   }
 
   // 한턴 진행
   function takeTurn(field) {
     return function () {
-      const pos = field.earthworm.move();
-      // 라인아웃 or 머리,몸 충돌 체크
-      const isOut = pos.x < 0 || pos.x >= field.row || pos.y < 0 || pos.y >= field.column;
+      const { newHead, didAte } = field.earthworm.move(field.food);
+
+      const isOut = newHead.x < 0 || newHead.x >= field.row || newHead.y < 0 || newHead.y >= field.column;
       const copied = field.earthworm.body.slice();
       copied.splice(0, 1);
-      const isConflict = copied.findIndex(function ({ x, y }) {
-        return (x === pos.x && y === pos.y)
+      const isConflict = copied.findIndex(function (block) {
+        return isSamePosition(block, newHead);
       }) !== -1;
       
-      if (isOut || isConflict) {
+      if (isOut || isConflict) {  // 라인아웃 or 머리,몸통 충돌
+        console.log('isOut: ' + isOut + ' | isConflict: ' + isConflict);
         field.pause();
         const replay = confirm('아웃입니다! 다시 시작하시겠습니까?');
         if (replay) {
@@ -42,20 +48,48 @@ function Field(row, column) {
         }
         return;
       }
+      else if (didAte) {  // 먹이를 먹었다면
+        field.food = undefined;
+      }
 
 
       field.reload();
     }
   }
 
-  // 지렁이 지우기
-  function eraseEarthworm() {
-    const oldEarthworm = fieldDom.querySelectorAll('.' + CLASS_FIELD_BLOCK_FILL);
-    if (oldEarthworm.length === 0) return;
-    for (var i = 0; i < oldEarthworm.length; i++) {
-      oldEarthworm[i].classList.remove(CLASS_FIELD_BLOCK_FILL);
+  // 필드 블록 지우기
+  function clearField() {
+    const fillBlocks = fieldDom.querySelectorAll('.' + CLASS_FIELD_BLOCK_FILL);
+    if (fillBlocks.length === 0) return;
+    for (var i = 0; i < fillBlocks.length; i++) {
+      fillBlocks[i].classList.remove(CLASS_FIELD_BLOCK_FILL);
+      fillBlocks[i].classList.remove(CLASS_FIELD_BLOCK_FOOD);
+      fillBlocks[i].classList.remove(CLASS_FIELD_BLOCK_HEAD);
     }
   }
+
+  // 먹이 생성
+  const feed = (function (field) {
+    return function () {
+      let food = { x: 0, y: 0 };
+      
+      let conflictWithBody = false;
+      do {
+        food = {
+          x: Math.floor(Math.random() * (field.row)),
+          y: Math.floor(Math.random() * (field.column))
+        }
+        
+        // 먹이와 지렁이가 겹치는지 확인
+        conflictWithBody = field.earthworm.body.findIndex(function (block) {
+          return isSamePosition(block, food)
+        }) !== -1;
+  
+      } while (conflictWithBody);
+  
+      field.food = food;
+    }
+  })(this);
 
 
   // 필드 초기화
@@ -111,8 +145,10 @@ function Field(row, column) {
 
   // 필드 리셋
   this.reload = function () {
-    eraseEarthworm();
+    clearField();
     drawEarthWorm(this.earthworm);
+    !this.food && feed(this);
+    fillBlock(this.food, [CLASS_FIELD_BLOCK_FOOD]);
   }
 
   // 게임 시작

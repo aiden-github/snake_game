@@ -14,7 +14,7 @@ function Earthworm() {
   }
 
   // 한칸 이동
-  this.move = function () {
+  this.move = function (feed) {
     const head = this.body[0];
     const movingX = this.arrow === ARROW.left ? -1
       : this.arrow === ARROW.right ? 1 : 0;
@@ -23,9 +23,18 @@ function Earthworm() {
 
     const newHead = { x: head.x + movingX, y: head.y + movingY };
     this.body.unshift(newHead);
-    this.body.pop();
 
-    return newHead;  // 새로운 머리 위치 반환
+    // 먹이 체크
+    let didAte = true;
+    if (!feed || !isSamePosition(head, feed)) {
+      didAte = false;
+      this.body.pop();
+    }
+
+    return {
+      newHead,  // 새로운 머리 위치
+      didAte    // 먹이를 먹은지
+    }; 
   }
 
   // 방향 설정

@@ -12,5 +12,11 @@
 }
 
 #field .block.fill{
+  background: #2A2A2A;
+}
+#field .block.fill.food{
+  background: red;
+}
+#field .block.fill.head{
   background: black;
 }
