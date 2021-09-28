@@ -5,6 +5,7 @@ function Field(row, column) {
   this.food;
   this.earthworm;
   this.interval;
+  this.currentArrow;
 
   // 블록 채우기
   function fillBlock(pos, otherClass = []) {
@@ -29,7 +30,7 @@ function Field(row, column) {
   function takeTurn(field) {
     return function () {
       const { newHead, didAte } = field.earthworm.move(field.food);
-
+      field.currentArrow = field.earthworm.getArrow();  // 진행했던 방향
       const isOut = newHead.x < 0 || newHead.x >= field.row || newHead.y < 0 || newHead.y >= field.column;
       const copied = field.earthworm.body.slice();
       copied.splice(0, 1);
@@ -38,9 +39,8 @@ function Field(row, column) {
       }) !== -1;
       
       if (isOut || isConflict) {  // 라인아웃 or 머리,몸통 충돌
-        console.log('isOut: ' + isOut + ' | isConflict: ' + isConflict);
         field.pause();
-        const replay = confirm('아웃입니다! 다시 시작하시겠습니까?');
+        const replay = confirm(`${ isOut ? '라인' : '충돌' } 아웃입니다! \n다시 시작하시겠습니까?`);
         if (replay) {
           field.earthworm.replace();
           field.reload();
@@ -51,7 +51,6 @@ function Field(row, column) {
       else if (didAte) {  // 먹이를 먹었다면
         field.food = undefined;
       }
-
 
       field.reload();
     }
@@ -114,7 +113,7 @@ function Field(row, column) {
     // 조작 설정
     const handleKey = (function (field) {
       return function (e) {
-        const preArrow = field.earthworm.getArrow();
+        const preArrow = field.currentArrow;
         switch (e.key) {
           case 'ArrowUp':
             if(preArrow !== ARROW.down)
